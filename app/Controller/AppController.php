@@ -24,12 +24,5 @@ class AppController extends Controller {
 		$this->layout = "life";
 	}
 
-	/*
-	* Sanitize the string entered 
-	* @return boolean
-	*/
-	public function sanitize(){
-
-		return true;
-	}
+	/*No need sanitize method*/
 }
