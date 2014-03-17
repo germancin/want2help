@@ -1,5 +1,6 @@
 <?php
 App::uses('AppController', 'Controller');
+App::uses('HttpSocket', 'Network/Http');
 /**
  * Projects Controller
  *
@@ -13,8 +14,14 @@ class ProjectsController extends AppController {
  *
  * @var array
  */
-	public $components = array('Paginator');
+	public $components = array('Paginator','RequestHandler');
 
+	public function beforefilter(){
+
+		parent::beforefilter();
+		$this->Auth->allow('socket');
+
+	}
 /**
  * index method
  *
@@ -23,6 +30,161 @@ class ProjectsController extends AppController {
 	public function index() {
 		$this->Project->recursive = 0;
 		$this->set('projects', $this->Paginator->paginate());
+	}
+
+	public function buyers_confirmation(){
+
+		if($this->request->is('get')){
+
+			if (!empty($_GET['tx'])){
+
+				$request_params = array(
+						'cmd' => '_notify-synch', 
+						'tx' => $_GET['tx'], 
+						'at' => 'CkhAfHMDmehkqSw5gzDcFv835TVSr-FQ9S4mFQobe_WW50IR2dVFJCcFdHy');
+				
+				$nvp_string = '';
+				foreach($request_params as $var=>$val){
+					$nvp_string .= '&'.$var.'='.urlencode($val);
+				}
+
+		        $ch = curl_init( 'https://www.sandbox.paypal.com/cgi-bin/webscr' );
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+				curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $nvp_string);
+				curl_setopt($ch, CURLOPT_HEADER, false); 
+				curl_setopt($ch, CURLOPT_NOBODY, false); // remove body 
+				curl_setopt($ch, CURLINFO_HEADER_OUT, TRUE); 
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
+			    $head = curl_exec($ch);
+
+				//parsing the curl response 
+			    $pieces = $this->array_up($head);
+				//var_dump( $pieces);
+				$this->set('curlResponse', $pieces );
+
+				$transacionResult = array_shift($pieces);
+				//var_dump($transactionResult);
+				$this->set('transacionResult' , $transacionResult);
+
+				curl_close( $ch );	
+				
+
+				$this->set('total',$pieces['mc_gross']);
+
+				$itemsList = $this->get_items_list($pieces);
+				$this->set('itemsList', $itemsList);
+
+				$projectAddress = $this->get_param_custom($pieces, 'projAddress');
+				$this->set('projectAddress', $projectAddress);
+
+				$this->Session->setFlash('Buyer Confirmation');
+
+				return true;	
+
+			}
+		}
+		$this->Session->setFlash('There is no information to process this requirment.');
+		return false;
+	}
+
+	public function get_items_list($itemsList){
+		$items = array(); $cont = 1;
+
+		foreach ($itemsList as $key => $value) {
+
+			if(strstr($key,'item_name')){
+				$numero = substr($key, -1, 1);
+				$items[$numero] = array('item'=>$value);
+			}
+
+			if(strstr($key,'mc_gross_')){
+				$numero = substr($key, -1, 1);
+
+				array_push($items[$numero], $items[$numero]['mc_gross'] = $value);
+			}
+
+			if(strstr($key,'quantity')){
+				$numero = substr($key, -1, 1);
+
+				array_push($items[$numero], $items[$numero]['quantity'] = $value);
+			}
+
+			if(strstr($key,'item_number')){
+				$numero = substr($key, -1, 1);
+
+				array_push($items[$numero], $items[$numero]['item_number'] = $value);
+			}
+
+			$cont = $cont+1;
+		}
+		return $items;
+	}
+
+    public function get_param_custom($get_response , $param){
+
+		foreach ($get_response as $key => $value) {
+
+			if(strstr($key,'custom')){
+
+			    $pices = explode(' ', urldecode($value));
+
+				foreach ($pices as $value) {
+
+					if (strstr($value, '=')) {
+
+						if (strstr($value, $param)) {
+							$userId = $value;
+							$userIdPice =explode('=', $userId);
+							$dataVal = $userIdPice[1];
+						}
+
+
+					}elseif ($param == 'projAddress'){
+						//concatenate the array elemnts dont have =
+						$dataVal .= " ".$value;
+
+					}
+				}
+
+			}
+		}
+		return $dataVal;
+	}
+
+	public function array_up($strCurlResult , $type = 'line') {
+	    
+	    if ($type === 'line') {
+
+			$pieces = explode("\n", $strCurlResult);
+
+		}elseif ($type === 'space'){
+
+			$pieces = explode(" ", $strCurlResult);
+		}
+
+		foreach ($pieces as $key => $value) {
+
+			$piecesI = explode("=", $value);
+
+			if (isset($piecesI[0])) { $key = $piecesI[0]; }else{ $key = ''; }
+
+			if (isset($piecesI[1])) { 
+				$value = $piecesI[1]; 
+			}else{
+					if(isset($piecesI[0])) {
+					 	 $value = $piecesI[0];
+					}else{
+						 $value = NULL; 
+					}
+					
+			}
+
+			$formatedArray[$key] = $value;
+		}
+
+		return $formatedArray;
 	}
 
 	public function donate(){
@@ -50,8 +212,34 @@ class ProjectsController extends AppController {
 		}
 		$options = array('conditions' => array('Project.' . $this->Project->primaryKey => $id));
 		$this->set('project', $this->Project->find('first', $options));
+
+
+					$HttpSocket = new HttpSocket(array('timeout' => 20));
+
+					// string data
+					$response = $HttpSocket->post('http://www.want-2-help.org/projects/socket', array('name'=>'Germando'));
+					$this->set('socket_response', $response->body);
+
+					//debug($HttpSocket->request);
+					//debug($response->raw);
+
+					// array data
+					//$data = array('name' => 'test', 'type' => 'user');
+					//$results = $HttpSocket->post('http://example.com/add', $data);
+
 	}
 
+public function socket(){
+
+	$this->layout = 'ajax';
+	$name = $_POST['name'];
+
+	$array['User']=  array('username'=>'carmelo', 'mobile'=>'111222333');
+	//$arrayM['Model']=  array('username'=>'carmelo', 'mobile'=>'345433');
+
+	echo http_build_query($array);
+	
+}
 /**
  * add method
  *
