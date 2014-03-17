@@ -1,0 +1,29 @@
+.container{
+	max-width:  none;
+	width:1228px;
+
+}
+.page{
+	margin-top: 30px;
+
+}
+.page-title h1{
+
+	padding: 10px 60px;
+	top: -72px;
+	left: 15px;
+	padding-left: 12px;
+	padding-right: 12px;
+}
+
+.page-title h1 span{
+
+	color: black;
+	font-weight: bold;
+	font-family: sans-serif;
+}
+.three-column{
+	margin-right: 10px;
+
+}
+
