@@ -15,6 +15,10 @@ class AppController extends Controller {
 
 	public $helpers = array('GoogleMap');
 
+	/*
+	* before filter aplication layout
+	*/
+
 	public function beforefilter(){
 
 		$this->layout = "life";
