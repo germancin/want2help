@@ -51,7 +51,7 @@ class AppController extends Controller {
 	        $this->layout = "life";
 	    }
 		
-		$this->Auth->allow('index','view','display','logout');
+		$this->Auth->allow('index','view','display','logout','process_confirmation');
 		$this->set('logged_in', $this->Auth->loggedIn());
 		$this->set('current_user', $this->Auth->user());
 	}

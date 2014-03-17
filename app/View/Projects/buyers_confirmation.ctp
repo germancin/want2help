@@ -53,7 +53,6 @@
 <center>
  
   <br/>
-  <input type="submit" value="- I Confirm -"/>
   <a href="/projects/process_confirmation/?items="<?php echo $itemsList; ?> class="btn">- CONFIRM -</a>
 
   <br/><br/>
