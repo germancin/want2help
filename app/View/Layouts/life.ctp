@@ -273,8 +273,18 @@ $(function() {
 
 		</ul> 
 
-		<div class="search-box">
-			<?php echo $this->Html->link('Login', array('controller'=> 'users', 'actions'=> 'login')); ?>
+		<div class="search-box" style="color:white; width:300px;	">
+
+			<?php if($logged_in):?>
+				Welcome, <?php echo $current_user['username']; ?>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				 <a href="/users/logout">Logout</a>
+		    <?php else: ?>
+     			<a href="/users/register">Register</a> /
+				<a href="/users/login">Login</a> 
+	        <?php endif; ?>
+
+
 		</div>
 
 	</div>
@@ -291,7 +301,7 @@ $(function() {
 
 		<div class="logo">
 
-			<a href="#" title=""><img src="/images/logo.png" alt="Logo" /><h1><i>L</i>ifeline</h1></a>
+			<a href="/" title=""><img src="/images/logo.png" alt="Logo" /><h1><i>L</i>ifeline</h1></a>
 
 		</div><!-- Logo -->
 
@@ -712,7 +722,10 @@ $(function() {
 </header><!--header-->
 
 <div class="container" >
-<?php $this->Session->flash() ?>
+<div style="position:relative; top:145px;">
+	<?php echo $this->Session->flash(); ?>
+</div>	
+
 
 <?php echo $this->fetch('content'); ?>
 <div style="clear:both"></div>
