@@ -9,28 +9,42 @@ App::uses('HttpSocket', 'Network/Http');
  */
 class ProjectsController extends AppController {
 
-/**
- * Components
- *
- * @var array
- */
+	/**
+	 * Components
+	 *
+	 * @var array
+	 */
 	public $components = array('Paginator','RequestHandler');
 
 	public function beforefilter(){
 
 		parent::beforefilter();
 		$this->Auth->allow('socket');
-
 	}
-/**
- * index method
- *
- * @return void
- */
+	/**
+	 * index method
+	 *
+	 * @return void
+	 */
 	public function index() {
 		$this->Project->recursive = 0;
 		$this->set('projects', $this->Paginator->paginate());
 	}
+
+	/**
+	 * Process the buyer confirmation 
+	 * - update the status of the itmes
+	 * - transfer the money to the buyer
+	 * @return void
+	 * @param 
+	 */
+	public function process_confirmation() {
+		if ($this->request->is('get')) {
+			var_dump($_GET['process_confirmation']);
+		}
+				
+	}
+			
 
 	public function buyers_confirmation(){
 
@@ -199,13 +213,13 @@ class ProjectsController extends AppController {
 
 	}
 
-/**
- * view method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * view method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function view($id = null) {
 		if (!$this->Project->exists($id)) {
 			throw new NotFoundException(__('Invalid project'));
