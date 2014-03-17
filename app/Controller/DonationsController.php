@@ -572,7 +572,7 @@ public function attempt(){
 				    $contQ = $contQ+1;
 				    $this->set('donation', $donation);
 
-				    $listItems[] = array('item_name' => $item_name, 'amount' => $cost, 'qty' => $qty);
+				    $listItems[] = array('item_name' => $item_name, 'amount' => $cost, 'qty' => $qty, 'item_id' => $need_id);
 				}
 
 				if (strstr($key,'location') && $value != '0') {

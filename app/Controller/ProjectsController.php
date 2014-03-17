@@ -40,12 +40,11 @@ class ProjectsController extends AppController {
 	 */
 	public function process_confirmation() {
 		if ($this->request->is('get')) {
-			var_dump($_GET['process_confirmation']);
+			var_dump($this->Auth->user());
 		}
-				
+					
 	}
 			
-
 	public function buyers_confirmation(){
 
 		if($this->request->is('get')){
@@ -87,6 +86,8 @@ class ProjectsController extends AppController {
 
 				$this->set('total',$pieces['mc_gross']);
 
+				$this->set('pices',$pieces);
+
 				$itemsList = $this->get_items_list($pieces);
 				$this->set('itemsList', $itemsList);
 
@@ -113,7 +114,12 @@ class ProjectsController extends AppController {
 				$items[$numero] = array('item'=>$value);
 			}
 
-			if(strstr($key,'mc_gross_')){
+			if(strstr($key,'item_number')){
+
+				$numero = substr($key, -1, 1);
+				array_push($items[$numero], $items[$numero]['item_id'] = $value);
+			}
+
 				$numero = substr($key, -1, 1);
 
 				array_push($items[$numero], $items[$numero]['mc_gross'] = $value);
@@ -124,15 +130,9 @@ class ProjectsController extends AppController {
 
 				array_push($items[$numero], $items[$numero]['quantity'] = $value);
 			}
-
-			if(strstr($key,'item_number')){
-				$numero = substr($key, -1, 1);
-
-				array_push($items[$numero], $items[$numero]['item_number'] = $value);
-			}
-
 			$cont = $cont+1;
 		}
+		var_dump($items);
 		return $items;
 	}
 
@@ -227,38 +227,36 @@ class ProjectsController extends AppController {
 		$options = array('conditions' => array('Project.' . $this->Project->primaryKey => $id));
 		$this->set('project', $this->Project->find('first', $options));
 
+			$HttpSocket = new HttpSocket(array('timeout' => 20));
 
-					$HttpSocket = new HttpSocket(array('timeout' => 20));
+			// string data
+			$response = $HttpSocket->post('http://www.want-2-help.org/projects/socket', array('name'=>'Germando'));
+			$this->set('socket_response', $response->body);
 
-					// string data
-					$response = $HttpSocket->post('http://www.want-2-help.org/projects/socket', array('name'=>'Germando'));
-					$this->set('socket_response', $response->body);
+			//debug($HttpSocket->request);
+			//debug($response->raw);
 
-					//debug($HttpSocket->request);
-					//debug($response->raw);
-
-					// array data
-					//$data = array('name' => 'test', 'type' => 'user');
-					//$results = $HttpSocket->post('http://example.com/add', $data);
+			// array data
+			//$data = array('name' => 'test', 'type' => 'user');
+			//$results = $HttpSocket->post('http://example.com/add', $data);
 
 	}
 
-public function socket(){
+	public function socket(){
+		$this->layout = 'ajax';
+		$name = $_POST['name'];
 
-	$this->layout = 'ajax';
-	$name = $_POST['name'];
+		$array['User']=  array('username'=>'carmelo', 'mobile'=>'111222333');
+		//$arrayM['Model']=  array('username'=>'carmelo', 'mobile'=>'345433');
 
-	$array['User']=  array('username'=>'carmelo', 'mobile'=>'111222333');
-	//$arrayM['Model']=  array('username'=>'carmelo', 'mobile'=>'345433');
+		echo http_build_query($array);
+	}
 
-	echo http_build_query($array);
-	
-}
-/**
- * add method
- *
- * @return void
- */
+	/**
+	 * add method
+	 *
+	 * @return void
+	 */
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->Project->create();
@@ -275,13 +273,13 @@ public function socket(){
 		$this->set(compact('needs', 'subcategories', 'users'));
 	}
 
-/**
- * edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * edit method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function edit($id = null) {
 		if (!$this->Project->exists($id)) {
 			throw new NotFoundException(__('Invalid project'));
@@ -303,13 +301,13 @@ public function socket(){
 		$this->set(compact('needs', 'subcategories', 'users'));
 	}
 
-/**
- * delete method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * delete method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function delete($id = null) {
 		$this->Project->id = $id;
 		if (!$this->Project->exists()) {
@@ -324,23 +322,23 @@ public function socket(){
 		return $this->redirect(array('action' => 'index'));
 	}
 
-/**
- * admin_index method
- *
- * @return void
- */
+	/**
+	 * admin_index method
+	 *
+	 * @return void
+	 */
 	public function admin_index() {
 		$this->Project->recursive = 0;
 		$this->set('projects', $this->Paginator->paginate());
 	}
 
-/**
- * admin_view method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * admin_view method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function admin_view($id = null) {
 		if (!$this->Project->exists($id)) {
 			throw new NotFoundException(__('Invalid project'));
@@ -349,11 +347,11 @@ public function socket(){
 		$this->set('project', $this->Project->find('first', $options));
 	}
 
-/**
- * admin_add method
- *
- * @return void
- */
+	/**
+	 * admin_add method
+	 *
+	 * @return void
+	 */
 	public function admin_add() {
 		if ($this->request->is('post')) {
 			$this->Project->create();
@@ -370,13 +368,13 @@ public function socket(){
 		$this->set(compact('needs', 'subcategories', 'users'));
 	}
 
-/**
- * admin_edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * admin_edit method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function admin_edit($id = null) {
 		if (!$this->Project->exists($id)) {
 			throw new NotFoundException(__('Invalid project'));
@@ -398,13 +396,13 @@ public function socket(){
 		$this->set(compact('needs', 'subcategories', 'users'));
 	}
 
-/**
- * admin_delete method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * admin_delete method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function admin_delete($id = null) {
 		$this->Project->id = $id;
 		if (!$this->Project->exists()) {

@@ -33,6 +33,7 @@
 			<th>Qty</th>
 			<th>Need</th>
 			<th>Cost</th>
+      <th>Item Id</th>
 		</tr>
 
 		<?php foreach ($itemsList as $item): ?>
@@ -40,6 +41,7 @@
 				<td><?php echo $item['quantity']; ?> </td>
 				<td><?php echo urldecode($item['item']); ?></td>
 				<td><?php echo "$".$item['mc_gross']; ?></td>
+        <td><?php //echo $item['item_number']; ?></td>
 			</tr>
 		<?php endforeach; ?>
 		
@@ -53,7 +55,11 @@
 <center>
  
   <br/>
-  <a href="/projects/process_confirmation/?items="<?php echo $itemsList; ?> class="btn">- CONFIRM -</a>
+  <?php var_dump($pices) . "<br/><br/>";?>
+  <?php var_dump($itemsList) . "<br/><br/>";?>
+  <?php echo $query = http_build_query($itemsList) . "<br/>";  ?>
+
+  <a href="/projects/process_confirmation/?items="<?php echo $query; ?> class="btn">- CONFIRM -</a>
 
   <br/><br/>
 -Case Location- <br/>
