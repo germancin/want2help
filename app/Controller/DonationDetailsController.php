@@ -48,6 +48,9 @@ class DonationDetailsController extends AppController {
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->DonationDetail->create();
+
+			var_dump($this->request->data);
+
 			if ($this->DonationDetail->save($this->request->data)) {
 				$this->Session->setFlash(__('The donation detail has been saved.'));
 				return $this->redirect(array('action' => 'index'));
@@ -58,7 +61,8 @@ class DonationDetailsController extends AppController {
 		$users = $this->DonationDetail->User->find('list');
 		$projects = $this->DonationDetail->Project->find('list');
 		$needs = $this->DonationDetail->Need->find('list');
-		$this->set(compact('users', 'projects', 'needs'));
+		$donations = $this->DonationDetail->Donation->find('list');
+		$this->set(compact('users', 'projects', 'needs', 'donations'));
 	}
 
 /**

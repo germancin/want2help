@@ -15,6 +15,38 @@ class UsersController extends AppController {
  */
 	public $components = array('Paginator');
 
+	public function beforeFilter(){
+		parent::beforeFilter();
+		$this->Auth->allow('register');
+	}
+
+	public function login() {
+		if ($this->request->is('post')) {
+			if($this->Auth->login()){
+				$this->Session->setFlash('You are now LogIn.');
+				$this->redirect($this->Auth->redirect());
+			}else{
+				$this->Session->setFlash('Your username/password was incorrect.');
+			}
+
+		}
+		
+	}
+
+	public function logout() {
+		$this->redirect($this->Auth->logout());
+	}
+
+	public function forgot_user() {
+
+	}
+
+	public function forgot_password() {
+
+	}
+
+
+
 /**
  * index method
  *
@@ -23,6 +55,28 @@ class UsersController extends AppController {
 	public function index() {
 		$this->User->recursive = 0;
 		$this->set('users', $this->Paginator->paginate());
+	}
+/**
+ * register method
+ *
+ * @return void
+ */
+	public function register() {
+		
+		if ($this->request->is('post')) {
+			$this->User->create();
+			if ($this->User->save($this->request->data)) {
+				$this->Session->setFlash(__('The user has been saved.'));
+				return $this->redirect(array('action' => 'index'));
+			} else {
+				$this->Session->setFlash(__('The user could not be saved. Please, try again.'));
+			}
+		}
+		$skills = $this->User->Skill->find('list');
+		$roles = $this->User->Role->find('list');
+		$points = $this->User->Point->find('list');
+		$this->set(compact('roles','points','skills'));
+
 	}
 
 /**
