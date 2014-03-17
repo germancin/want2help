@@ -23,4 +23,9 @@ class AppController extends Controller {
 
 		$this->layout = "life";
 	}
+
+	public function sanitize(){
+
+		return true;
+	}
 }
