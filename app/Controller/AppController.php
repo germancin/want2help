@@ -23,4 +23,6 @@ class AppController extends Controller {
 
 		$this->layout = "life";
 	}
+
+	/*No need sanitize method*/
 }
