@@ -12,11 +12,54 @@
 </style>
 
 
- 	<style type="text/css">
+<style type="text/css">
 
-      #map-canvas { height: 300px;
-      width:350px; }
-    </style>
+  #map-canvas { 
+  	height: 300px;
+     width:350px; 
+  }
+
+</style>
+
+<script>
+$(document).ready(function() {
+	console.log("runned");
+    $('input[type=checkbox]').mousedown(function() {
+		console.log("click :: "+$(this).is(':checked'))
+        if (!$(this).is(':checked')) {
+            var checkName = $(this).attr('name');
+            //the checked elemtn has location?
+            if (!checkName.indexOf( "location" )){
+                var number = checkName.split("_");
+                var item   = "item_"+number[1];
+                $("input:checkbox[name="+item+"]").attr("disabled", true);
+            }else{
+                var number = checkName.split("_");
+                var location   = "location_"+number[1];
+                $("input:checkbox[name="+location+"]").attr("disabled", true);  
+            }  
+        }else{
+            //if the click is switch to off
+            var checkName = $(this).attr('name');
+            //the checked elemtn has location?
+            if (!checkName.indexOf( "item" )){
+                //alert("is location i gonna change to able ");
+                var number = checkName.split("_");
+                var location   = "location_"+number[1];
+                //switch location status if is checked
+                $("input:checkbox[name="+location+"]").attr("disabled", false); 
+               
+            }else{
+                //alert("is a item i gonna change to be able be clickjed");
+                var number = checkName.split("_");
+                var item   = "item_"+number[1];
+                $("input:checkbox[name="+item+"]").attr("disabled", false);  
+            }  
+        }
+    });
+});
+
+</script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9FB3pY07t9ds2_jeQS4bqeQBMppT9c80&sensor=false&v=3&libraries=geometry">
 </script>
     </script>
@@ -43,7 +86,7 @@
 
 				<?php echo $project['Project']['video']; ?>
 
-			<div style="float:right ; width:600px; border:0px solid black; ">
+			  <div style="float:right ; width:600px; border:0px solid black; ">
 			  <h5><?php echo h($project['Project']['short_description']); ?></h5>
 			  <p><?php echo h($project['Project']['description']); ?> </p>
 			  <p>
@@ -54,9 +97,11 @@
 <div class="related">
 	<h3><?php echo __('Related Needs'); ?></h3>
 	<?php if (!empty($project['Need'])): ?>
-	<?php echo $this->Form->create('Project',array('action'=>'donate')); ?>
+
+	<?php echo $this->Form->create('Donation',array('action'=>'attempt')); ?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
+		<th><?php echo __('Qty'); ?></th>
 		<th><?php echo __('Name'); ?></th>
 		<th><?php echo __('Prox Value'); ?></th>
 		<th><?php echo __('Description'); ?></th>
@@ -64,20 +109,24 @@
 		<th><?php echo __('At Location'); ?></th>
 		<th class="actions"><?php echo __('Actions'); ?></th>
 	</tr>
-	<?php foreach ($project['Need'] as $need): ?>
+
+	<?php  $cont = 1;
+	foreach ($project['Need'] as $need): ?>
 		<tr>
-			
+			<td><?php echo "1"; ?></td>
 			<td><?php echo $need['name']; ?></td>
 			<td><?php echo "$".$need['prox_value']; ?></td>
 			<td><?php echo $need['description']; ?></td>
-			<td><?php echo $this->Form->input("",array('type' => 'checkbox', 'value'=>$need['prox_value'],'name'=>'moneyVal-'.$need['id'])); ?></td>
-			<td><?php echo $this->Form->input("",array('type' => 'checkbox', 'value'=>$need['id'], 'name'=>'needId-'.$need['id'])); ?></td>
+			<td><?php echo $this->Form->input("",array('type' => 'checkbox', 'value'=>$need['prox_value']."&&".$need['name']."&&".$need['id']."&&".'1','name'=>'item_'.$cont, 'id'=>'checkbox_donation'.$cont)); ?></td>
+			<td><?php echo $this->Form->input("",array('type' => 'checkbox', 'value'=>$need['prox_value']."&&".$need['name']."&&".$need['id']."&&".'1','name'=>'location_'.$cont, 'id'=>'checkbox_location'.$cont)); ?></td>
 			<td class="actions">
 				<?php echo $this->Html->link(__('Edit'), array('controller' => 'needs', 'action' => 'edit', $need['id'])); ?>
 			</td>
 		</tr>
 
-	<?php endforeach; ?>
+	<?php 
+	$cont = $cont+1;
+	endforeach; ?>
 
 	</table>
 	<?php $options = array(
@@ -87,25 +136,138 @@
         'style' => 'border:0px solid black; text-align:right; padding-right:10px; '
     )
 		); ?>
-<?php $projectAddress = $project['Project']['address']. " ". $project['Project']['city']." ". $project['Project']['state']. " ". $project['Project']['zipcode']; ?>
-<?php $projectTitle = $project['Project']['title']; ?>
+    <?php $projectAddress = $project['Project']['address']. " ". $project['Project']['city']." ". $project['Project']['state']. " ". $project['Project']['zipcode']; ?>
+    <?php $projectTitle = $project['Project']['title']; ?>
 	<?php echo $this->Form->input("",array('type' => 'hidden','name'=>'projectAddress', 'value'=> $projectAddress )); ?>
 	<?php echo $this->Form->input("",array('type' => 'hidden','name'=>'projectTitle', 'value'=> $projectTitle )); ?>	
-    <?php echo $this->Form->input("",array('type' => 'hidden','name'=>'userId', 'value'=>'2')); ?>
+	<?php echo $this->Form->input("",array('type' => 'hidden','name'=>'project_id', 'value'=> $project['Project']['id'] )); ?>	
+    <?php echo $this->Form->input("",array('type' => 'hidden','name'=>'userId', 'value'=> $current_user['id'] )); ?>
+    <?php echo $this->Form->input("",array('type' => 'hidden','name'=>'cart_qty', 'value'=>$cont-1)); ?>
+
+
 	<?php echo $this->Form->end($options); ?>
 <?php endif; ?>
 </div> <!-- related close -->
 
-<?php $rr = "10.00";?>
 
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="NVRMMDRAKS82J">
-<input type="hidden" name="item_name" value="ALcohol and Gasas - For Thanaca la paerra de camarro">
-<input type="hidden" name="amount" value="<?php echo $rr; ?>">
-<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-</form>
+
+
+
+<?php
+
+
+// Set sandbox (test mode) to true/false.
+$sandbox = TRUE;
+
+// Set PayPal API version and credentials.
+$api_version = '85.0';
+$api_endpoint = $sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp';
+$api_username = $sandbox ? 'elmaildegerman-facilitator_api1.gmail.com' : 'LIVE_USERNAME_GOES_HERE';
+$api_password = $sandbox ? '1387213747' : 'LIVE_PASSWORD_GOES_HERE';
+$api_signature = $sandbox ? 'AiPC9BjkCyDFQXbSkoZcgqH3hpacAzaTvKhy7qEk66W8HIx-AuFUF9lV' : 'LIVE_SIGNATURE_GOES_HERE';
+
+
+// Store request params in an array
+/*$request_params = array
+					(
+					'METHOD' => 'DoDirectPayment', 
+					'USER' => $api_username, 
+					'PWD' => $api_password, 
+					'SIGNATURE' => $api_signature, 
+					'VERSION' => $api_version, 
+					'PAYMENTACTION' => 'Sale', 					
+					'IPADDRESS' => $_SERVER['REMOTE_ADDR'],
+					'CREDITCARDTYPE' => 'Visa', 
+					'ACCT' => '4300389932298223', 						
+					'EXPDATE' => '12/2018', 			
+					'CVV2' => '456', 
+					'FIRSTNAME' => 'Tester', 
+					'LASTNAME' => 'Testerson', 
+					'STREET' => '707 W. Bay Drive', 
+					'CITY' => 'Largo', 
+					'STATE' => 'FL', 					
+					'COUNTRYCODE' => 'US', 
+					'ZIP' => '33770', 
+					'AMT' => '100.00', 
+					'CURRENCYCODE' => 'USD', 
+					'DESC' => 'Testing Payments Pro' 
+					);*/
+
+
+$request_params = array(
+					'cmd' => '_cart', 
+					'upload' => '1', 
+					'business' => 'want2help@gmail.com', 
+					'item_name_1' => 'Catalis - For catalina la gata pobresita', 					
+					'amount_1' => '4.25',
+					'item_number_1' => '001',
+					'item_name_2' => '12 bottles of watter', 					
+					'amount_2' => '4.00',
+					'item_number_2' => '002',
+					'return' => 'http://www.want-2-help.org/donations/confirmation/',
+					'rm'=>'2', //sending mthod POST to the return URL
+					'notify_url' => 'http://www.want-2-help.org/donations/notify',
+					'custom' => 'var1=algo1 var2=algo2',
+
+					);
+
+
+
+					
+// Loop through $request_params array to generate the NVP string.
+$nvp_string = '';
+foreach($request_params as $var=>$val)
+{
+	$nvp_string .= '&'.$var.'='.urlencode($val);	
+}
+
+
+$url = urldecode("https://www.sandbox.paypal.com/cgi-bin/webscr".$nvp_string);?>
+
+<a href="<?php echo $url; ?>">paypal</a>
+
+<?php
+
+echo '<pre>';
+
+echo $socket_response;
+
+$socket_responseDecode = urldecode($socket_response);
+
+echo "<br/>";
+
+parse_str($socket_response);
+
+foreach ($User as $key => $value) {
+	echo $key."=".$value;
+	echo "<br/>";
+}
+
+//echo $socket_responseDecode;
+echo "<br/>";
+//echo parse_url($socket_response);
+echo '</pre>';
+
+
+// Function to convert NTP string to an array
+function NVPToArray($NVPString)
+{
+	$proArray = array();
+	while(strlen($NVPString))
+	{
+		// name
+		$keypos= strpos($NVPString,'=');
+		$keyval = substr($NVPString,0,$keypos);
+		// value
+		$valuepos = strpos($NVPString,'&') ? strpos($NVPString,'&'): strlen($NVPString);
+		$valval = substr($NVPString,$keypos+1,$valuepos-$keypos-1);
+		// decoding the respose
+		$proArray[$keyval] = urldecode($valval);
+		$NVPString = substr($NVPString,$valuepos+1,strlen($NVPString));
+	}
+	return $proArray;
+}
+?>
 
 
 
@@ -118,114 +280,7 @@
 		</div>
 
 
-	<div class="container">
-		<section id="tabs-style" class="element">
-			<h3 class="sub-head">TABS STYLE</h3>
-			<div class="theme-tabs">
-				<ul class="nav nav-tabs" id="myTab">
-					<li class="active"><a data-toggle="tab" href="#tab1">Heading 1</a></li>
-					<li class=""><a data-toggle="tab" href="#tab2">Special Needs</a></li>
-					<li class=""><a data-toggle="tab" href="#tab3">Heading 3</a></li>
-					<li class=""><a data-toggle="tab" href="#tab4">Heading 4</a></li>
-					<li class=""><a data-toggle="tab" href="#tab5">Heading 5</a></li>
-					<li class=""><a data-toggle="tab" href="#tab6">Heading 6</a></li>
-				</ul>			
-				<div class="tab-content" id="myTabContent">
-					<div id="tab1" class="tab-pane fade in active">
-<div id="map-canvas"/>
-					</div>
-					<div id="tab2" class="tab-pane fade">
-
-
-
-
-
-<div class="related">
-	<h3><?php echo __('Related Needs'); ?></h3>
-	<?php if (!empty($project['Need'])): ?>
-	<?php echo $this->Form->create('Project',array('action'=>'donate')); ?>
-	<table cellpadding = "0" cellspacing = "0">
-	<tr>
-		<th><?php echo __('Name'); ?></th>
-		<th><?php echo __('Prox Value'); ?></th>
-		<th><?php echo __('Description'); ?></th>
-		<th><?php echo __('Donate'); ?></th>
-		<th><?php echo __('At Location'); ?></th>
-		<th class="actions"><?php echo __('Actions'); ?></th>
-	</tr>
-	<?php foreach ($project['Need'] as $need): ?>
-		<tr>
-			
-			<td><?php echo $need['name']; ?></td>
-			<td><?php echo "$".$need['prox_value']; ?></td>
-			<td><?php echo $need['description']; ?></td>
-			<td><?php echo $this->Form->input("",array('type' => 'checkbox', 'value'=>$need['prox_value'],'name'=>'moneyVal-'.$need['id'])); ?></td>
-			<td><?php echo $this->Form->input("",array('type' => 'checkbox', 'value'=>$need['id'], 'name'=>'needId-'.$need['id'])); ?></td>
-			<td class="actions">
-				<?php echo $this->Html->link(__('View'), array('controller' => 'needs', 'action' => 'view', $need['id'])); ?>
-				<?php echo $this->Html->link(__('Edit'), array('controller' => 'needs', 'action' => 'edit', $need['id'])); ?>
-				<?php echo $this->Form->postLink(__('Delete'), array('controller' => 'needs', 'action' => 'delete', $need['id']), null, __('Are you sure you want to delete # %s?', $need['id'])); ?>
-			</td>
-		</tr>
-
-	<?php endforeach; ?>
-
-	</table>
-	<?php $options = array(
-    'label' => 'Donate',
-    'div' => array(
-        'class' => 'donateBtn',
-        'style' => 'border:0px solid black; text-align:right; padding-right:10px; '
-    )
-		); ?>
-
-    <?php echo $this->Form->input("",array('type' => 'hidden','name'=>'projectId', 'value'=>$project['Project']['id'])); ?>
-    <?php echo $this->Form->input("",array('type' => 'hidden','name'=>'MyuserId', 'value'=>'2')); ?>
-    
-    <?php echo "project id :". $project['id']; ?>
-	<?php echo $this->Form->end($options); ?>
-<?php endif; ?>
-
-	<div class="actions">
-		<ul>
-			<li><?php echo $this->Html->link(__('New Need'), array('controller' => 'needs', 'action' => 'add')); ?> </li>
-		</ul>
-	</div>
-</div>
-
-
-
-
-
-					</div>
-					<div id="tab3" class="tab-pane fade">
-						<div class="aligned right">
-							<img class="pull-right" src="http://placehold.it/270x184" alt="" />
-							<h5>Donec et libero quis</h5>
-							  <p>Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam. id Suus arciet spendisse rhoncus id arcet porta. Aenean blandit ipsum, pharetrnisi vesti bulum ornare.Lorie ipsum dolor st amet, cons ctetur adipiscing elit. Duis non   sceleri sque est, quis aliquam ligula.Aenean blamp esum. Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica. </p>
-						</div>
-					</div>
-					<div id="tab4" class="tab-pane fade">
-						<ul class="theme-list pull-left">
-							<li><i class="icon-check"></i>Check - Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam</li>
-							<li><i class="icon-check"></i>Check - Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam</li>
-							<li><i class="icon-check"></i>Check - Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam</li>
-							<li><i class="icon-check"></i>Check - Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam</li>
-							<li><i class="icon-check"></i>Check - Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam</li>
-							<li><i class="icon-check"></i>Check - Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam</li>
-						</ul>
-					</div>
-					<div id="tab5" class="tab-pane fade">
-					  <p>Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam. id Suus arciet spendisse rhoncus id arcet porta. Aenean blandit ipsum, pharetrnisi vesti bulum ornare. </p>
-					</div>
-					<div id="tab6" class="tab-pane fade">
-					  <p>Donec et libero quis erat commodo suscipit. Mae elit a,  eleifend leo. Phase llus ut phar etra mi, ctor diam. id Suus arciet spendisse rhoncus id arcet porta. Aenean blandit ipsum, pharetrnisi vesti bulum ornare.Lorie ipsum dolor st amet, cons ctetur adipiscing elit. Duis non   sceleri sque est, quis aliquam ligula.Aenean blamp esum. Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica. Reprehenderit butcher retro keffiyeh isicatcher synth. Cosby sweater eu banh mi, qui irure terry richardson ex squid. Aliquip placeat salvia cillum iphone. </p>
-					</div>
-				</div>
-			</div>
-		</section><!-- Tabs -->
-	</div><!-- Container -->
-
+	
 
 
 
@@ -364,4 +419,6 @@
 
 
 </section>
+
+
 

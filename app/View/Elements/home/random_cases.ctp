@@ -20,7 +20,9 @@
 										<span>in <i>South Africa</i></span>
 										<p>Duis accumsan rhosn cius arcvira orem bland it sit admet. Sedi ceel ugue. In idn iacues ante. Proi rien is mi gravida viverra.</p>
 										<span class="help"><strong>Help us</strong> to collect:</span>
-										<span class="needed-amount"><span>$</span>20,000 </span>
+										<span class="needed-amount">
+
+											<span>$</span>20,000 <a href="/projects/view/1">More...</a></span>
 									</div>
 							</div>
 							<div class="causes-image">
@@ -48,7 +50,7 @@
 									<span>in <i>South Africa</i></span>
 									<p>Duis accumsan rhosn cius arcvira orem bland it sit admet. Sedi ceel ugue. In idn iacues ante. Proi rien is mi gravida viverra.</p>
 									<span class="help"><strong>Help us</strong> to collect:</span>
-									<span class="needed-amount"><span>$</span>20,000 </span>
+									<span class="needed-amount"><span>$</span>20,000  <a href="/projects/view/2">More...</a></span>
 								</div>
 							</div>					
 						</li>
